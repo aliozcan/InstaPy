@@ -4241,6 +4241,69 @@ class InstaPy:
         )
         return grabbed_followers
 
+    def grab_post_commenters(self, username: str = None):
+        pass
+
+    def grab_post_likers(self, username: str = None, photo_urls: list = [], photos_grab_amount:int = 5, randomize: bool = False):
+        result = dict()
+        if not photo_urls:
+            photo_urls = get_photo_urls_from_profile(
+                    self.browser, username, photos_grab_amount, randomize
+            )
+    
+        for photo_url in photo_urls:
+            likers = users_liked(self.browser, photo_url, 0)
+            result[photo_url] = likers
+
+        return result
+
+    def grab_posts(
+        self,
+        username: str = None,
+        amount: int = None,
+        live_match: bool = False,
+        randomize: bool = False
+    ):
+        message = "Starting to get the `Posts` data.."
+        highlight_print(self.username, message, "feature", "info", self.logger)
+
+        if username is None:
+            self.logger.warning(
+                "Please provide a username to grab `Posts` data"
+                "  ~e.g. your own username or somebody else's"
+            )
+            return self
+
+        elif amount is None:
+            self.logger.warning("Please put amount to grab `Posts` data")
+            return self
+
+        elif amount != "full" and (
+            type(amount) != int or ((type(amount) == int and amount <= 0))
+        ):
+            self.logger.info(
+                "Please provide a valid amount bigger than"
+                " zero (0) to grab `Posts` data"
+            )
+            return self
+
+        # Get `Posts` data
+        try:
+            links = get_links_for_username(
+                self.browser,
+                self.username,
+                username,
+                amount,
+                self.logger,
+                self.logfolder,
+                randomize
+            )
+
+        except NoSuchElementException:
+            self.logger.error("Element not found, skipping this username")
+
+        return links
+
     def grab_following(
         self,
         username: str = None,
